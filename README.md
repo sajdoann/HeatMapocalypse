@@ -1,2 +1,2 @@
-# HeatMapocalypse
-group project of NSYSU students about changeing temperature in the world
+# ☀️ HeatMapocalypse
+group project of NSYSU students about temperature change in the world throughout the years
