@@ -5,14 +5,14 @@
 </head>
 
 <body>
-	<div id='mySprial' width="1640" height="2080"><!-- Plotly chart will be drawn inside this DIV --></div>
+	<div id='mySprial'><!-- Plotly chart will be drawn inside this DIV --></div>
 </body>
 d
 <script>
     // set the dimensions and margins of the graph
     const margin = {top: 10, right: 30, bottom: 30, left: 40},
-        width = 400 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+        width = 800 - margin.left - margin.right,
+        height = 800 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
     const svg = d3.select("#mySprial")
@@ -38,6 +38,12 @@ d
         data = data.filter(function(d) { 
             return d.Country == Country;       
         })
+        var sYear = 1800;
+        var eYear = 1820;
+        data = data.filter(function(d) {
+            y = parseInt(d.dt) ;
+            return (y > sYear && y < eYear);       
+        })
 
         var pointCount = data.length;
         var i, r;
@@ -50,16 +56,30 @@ d
         for(i = 0; i < pointCount; i++)
         {
             // things encode with temperature
-            r = data[i].AverageTemperature;
+            r = data[i].AverageTemperature + 1;
+            if(r === '')
+                continue;
             c.push(r);
 
             mon = parseInt(data[i].dt.split('-')[1])
             year = parseInt(data[i].dt.split('-')[0])
             // things endeo with date
-            x.push(r * Math.cos(mon / 12));
-            y.push(r * Math.sin(mon / 12));
-            z.push(year-1755);
+            x.push(r * Math.cos(mon/6 * Math.PI) );
+            y.push(r * Math.sin(mon/6 * Math.PI) );
+            z.push((year-1755 + mon/12)/2);
         }
+        var layout = {
+            title: {
+                text: Country,
+                font: {
+                    family: 'Courier New, monospace',
+                    size: 70
+                },
+                yref: 'paper',
+                automargin: true,
+            },
+            showlegend: false
+          };
 
         Plotly.newPlot('mySprial', [{
             type: 'scatter3d',
@@ -71,7 +91,7 @@ d
             line: {
                 width: 10,
                 color: c,
-                colorscale: 'Inferno'}
-        }]);
+                colorscale: 'Inferno'} //color scale
+        }],layout);
     });
 </script>
