@@ -71,6 +71,7 @@
 // This allows to find the closest X index of the mouse:
 const bisect = d3.bisector(function(d) { return d.date; }).left;
 
+
 // // Create the circle that travels along the curve of chart
 var focus = svg
   .append('g')
@@ -80,14 +81,25 @@ var focus = svg
     .attr('r', 5)
     .style("opacity", 0)
 
+    const tooltip = d3.select("#my_dataviz")
+      .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+      .style("position", "absolute");
+
 // Create the text that travels along the curve of chart
-var focusText = svg
-  .append('g')
-  .append('text')
-    .style("opacity", 0)
-    .attr("text-anchor", "left")
-    .attr("alignment-baseline", "middle")
-    .style("font-size", "12px")
+// var focusText = svg
+//   .append('g')
+//   .append('text')
+//     .style("opacity", 0)
+//     .attr("text-anchor", "left")
+//     .attr("alignment-baseline", "middle")
+//     .style("font-size", "12px")
 
   
 
@@ -197,12 +209,12 @@ var focusText = svg
       )
     });
 
+
 //mouseover
   var mouseover = function(event, d) {
     console.log("mouse in")
     focus.style("opacity", 1)
-    focusText.style("opacity",1)
-    focus.Text.style("fill", "grey")
+    tooltip.style("opacity",1)
   }
 
   var mousemove = function(event, d)  {
@@ -210,18 +222,20 @@ var focusText = svg
     const y0 = yScale.invert(d3.pointer(event, this)[1]);
     const i = bisect(data, y0, 1);
     selectedData = data[i]
+
     focus
       .attr("cx", xScale(selectedData.value))
       .attr("cy", yScale(selectedData.date))
-    focusText
-      .html("temperature:" + selectedData.value + "  " + "date:" + selectedData.date)
-      .attr("x", xScale(selectedData.value)+15)
-      .attr("y", yScale(selectedData.date))
+    tooltip
+    
+            .html("Temperature: " + selectedData.value + " - " + " Date: " + selectedData.date)
+            .style("left", xScale(selectedData.value)+ 2 + "px")
+            .style("top", yScale(selectedData.date) + "px")
     }
   var mouseout = function(event, d)  {
     console.log("mouse out")
     focus.style("opacity", 0)
-    focusText.style("opacity", 0)
+    tooltip.style("opacity", 0)
   }
 
     line
