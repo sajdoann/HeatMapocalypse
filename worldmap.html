@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    path {
+      stroke: white;
+      stroke-width: 0.25px;
+      fill: grey;
+    }
+
+    #map-container {
+      position: relative;
+      height: 100%;
+    }
+
+    /* Adjust the slider styles */
+    #mySlider {
+      width: 80%; /* Set the desired width */
+      position: absolute;
+      bottom: 20px; /* Adjust the distance from the bottom */
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1; /* Ensure the slider appears above the map */
+    }
+
+    /* Centered textbox styles */
+    #textbox {
+      position: absolute;
+      width: 400px;
+      height: 30px;
+      bottom: 40px; /* Adjust the distance above the slider */
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: white;
+      padding: 4px;
+      border: 1px solid black;
+      font-size: 32px;
+      color: black;
+      z-index: 2; /* Ensure the textbox appears above the map */
+    }
+  </style>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/topojson.v0.min.js"></script>
+</head>
+<body>
+  <div id="map-container">
+    <input type="range" name="mySlider" id="mySlider" min="1743-11" max="2013-09" step="1" value="1743-11">
+    <div id="textbox"></div> <!-- Add the textbox element -->
+  </div>
+
+  <script>
+    var width = window.innerWidth,
+        height = window.innerHeight;
+
+    var projection = d3.geo.equirectangular()
+        .translate([width / 2, height / 2])
+        .scale(350);
+
+    var svg = d3.select("#map-container").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var g = svg.append("g");
+
+    // Define the color scale
+    var colorScale = d3.scale.linear()
+        .domain([0, 30]) // Set the temperature range
+        .range(["blue", "red"]); // Set the corresponding color range
+
+    // load and display the World
+    d3.json("world-110m2.json", function (error, topology) {
+      var startDate = new Date("1743-11");
+      var value = 0; // Initialize value
+      var selectedYearMonth = "1743-11";
+
+      var slider = d3.select("#mySlider");
+      var textbox = d3.select("#textbox");
+
+      // Update the min and max attributes of the slider
+      var maxMonths = (2013 - 1743) * 12 + 9;
+      slider.attr("min", 0).attr("max", maxMonths);
+
+      slider.on("input", function () {
+        value = +this.value; // Update value
+        var year = Math.floor(value / 12) + 1743;
+        var month = (value % 12) + 1;
+        var monthString = ("0" + month).slice(-2);
+        selectedYearMonth = year + "-" + monthString;
+        textbox.text("Year: " + year + ", Month: " + month).style("color", "black");
+
+        // load and display the cities
+        d3.csv("trytry.csv", function (error, data) {
+          // Store the data in a global variable for later use
+//         window.data = data;
+
+          // Filter the data based on the initial selected year and month
+//          var filteredData = data.filter(function (d) {
+//            return d.yearmonth === selectedYearMonth;
+//          });
+
+          // Update the data binding for the circles
+          var circles = g.selectAll("circle").data(data);
+
+          circles.enter()
+            .append("a")
+            .attr("xlink:href", function(d) {
+              return "https://www.google.com/search?q=" + d.City;
+            })
+            .append("circle")
+            .attr("cx", function (d) {
+              return projection([d.lon, d.lat])[0];
+            })
+            .attr("cy", function (d) {
+              return projection([d.lon, d.lat])[1];
+            })
+            .attr("r", 5)
+            .style("opacity", 0.5)
+            .style("fill", function (d) {
+              return colorScale(+d.AverageTemperature);
+            });
+
+          circles.exit().remove();
+
+          // Update the existing circles' positions
+          g.selectAll("circle")
+            .data(data)
+            .attr("cx", function(d) {
+              return projection([d.lon, d.lat])[0];
+            })
+            .attr("cy", function(d) {
+              return projection([d.lon, d.lat])[1];
+            })
+            .style("fill", function(d) {
+              return colorScale(+d.AverageTemperature);
+            });
+        });
+      });
+
+      g.selectAll("path")
+        .data(topojson.object(topology, topology.objects.countries).geometries)
+        .enter()
+        .append("path")
+        .attr("d", path);
+    });
+
+    // zoom and pan
+    var zoom = d3.behavior.zoom()
+      .on("zoom", function () {
+        var currentScale = d3.event.scale;
+        var minScale = 1; // Minimum allowed scale
+
+        // Check if the current scale is smaller than the minimum scale
+        if (currentScale < minScale) {
+          // Set the scale and translation to the minimum values
+          d3.event.scale = minScale;
+          d3.event.translate = [0, 0];
+        }
+
+        g.attr("transform", "translate(" +
+          d3.event.translate.join(",") + ")scale(" + d3.event.scale + ")");
+        g.selectAll("circle")
+          .attr("d", path.projection(projection));
+        g.selectAll("path")
+          .attr("d", path.projection(projection));
+      });
+
+    svg.call(zoom);
+  </script>
+</body>
+</html>
