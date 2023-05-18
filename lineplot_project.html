@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v6.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+</head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Indie+Flower&family=Kalam&family=Mogra&family=Shadows+Into+Light&display=swap');
+
+</style>
+<body>
+
+  <div id="my_dataviz"></div>
+
+<script>
+
+  // set the dimensions and margins of the graph
+  const margin = {top: 50, right: 100, bottom: 50, left: 100},
+        width = 800 - margin.left - margin.right,
+        height = 20000 - margin.top - margin.bottom;
+  
+  // append the svg object to the body of the page
+  const svg = d3.select("#my_dataviz")
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",`translate(${margin.left},${margin.top})`);
+  
+  //Read the data
+  d3.csv("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/GlobalTemperatures.csv",
+  
+    // When reading the csv, I must format variables:
+    d => {
+      return { date : d3.timeParse("%Y-%m-%d")(d.date), value : d.value, fact: d.fact }
+    }).then(
+  
+    
+    function(data) {
+
+      // Keep only the 90 first rows
+      data = data.filter((d,i) => i<3192)
+  
+      const max = d3.max(data, function(d){ return +d.value; });
+      const min = d3.min(data, function(d){ return +d.value; });
+      const xMean = d3.mean(data, function(d){ return +d.value; });
+      // Add X Axis
+      const xScale = d3.scaleLinear()
+        .domain([min, max])
+        .range([0, width]);
+      xAxis = svg.append("g")
+        .attr("transform", "translate(0, ${margin.top})")    //${height}  //
+        .call(d3.axisTop(xScale).tickValues([min,((min+xMean)/2),xMean,((max+xMean)/2),max]).tickSizeOuter(0));  //[min,xMean,max]
+      
+      const yMin = d3.min(data, d => d.date);
+      const yMax = d3.max(data, d => d.date);
+
+      // Add y Axis  
+      const yScale = d3.scaleTime()
+        .domain(d3.extent(data, d => d.date))   //  [new Date('1750-01-01'), new Date('2015')]
+        .range([0, height])
+      
+      const fiveYearInterval = d3.timeYear.every(10);
+      const tickValues = fiveYearInterval.range(yScale.domain()[0], yScale.domain()[1]);
+      yAxis = svg.append("g")
+        .attr("transform", `translate( ${width/2},0)`)
+        .call(d3.axisRight(yScale).tickValues(tickValues).tickSizeOuter(0));
+      
+// This allows to find the closest X index of the mouse:
+const bisect = d3.bisector(function(d) { return d.date; }).left;
+
+
+// // Create the circle that travels along the curve of chart
+var focus = svg
+  .append('g')
+  .append('circle')
+    .style("fill", "none")
+    .attr("stroke", "black")
+    .attr('r', 5)
+    .style("opacity", 0)
+
+    const tooltip = d3.select("#my_dataviz")
+      .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "white")
+      .style("border", "solid")
+      .style("border-width", "2px")
+      .style("border-radius", "5px")
+      .style("padding", "5px")
+      .style("position", "absolute");
+
+// Create the text that travels along the curve of chart
+// var focusText = svg
+//   .append('g')
+//   .append('text')
+//     .style("opacity", 0)
+//     .attr("text-anchor", "left")
+//     .attr("alignment-baseline", "middle")
+//     .style("font-size", "12px")
+
+  
+
+    const group = svg.append("g").attr("class", "group");
+
+      // Set the gradient
+      svg.append("linearGradient")
+      .attr("id", "line-gradient")
+      .attr("gradientUnits", "userSpaceOnUse")
+      .attr("x1", xScale(min))
+      .attr("y1", 0)
+      .attr("x2", xScale(max))
+      .attr("y2", 0)
+      .selectAll("stop")
+        .data([
+          {offset: "0%", color: "blue"},
+          {offset: "100%", color: "red"}
+        ])
+      .enter().append("stop")
+        .attr("offset", function(d) { return d.offset; })
+        .attr("stop-color", function(d) { return d.color; });
+//zoom-In Effect
+      // Add a clipPath
+      const clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width )
+        .attr("height", height )
+        .attr("x", 0)
+        .attr("y", 0);
+    const brush = d3.brushY()                   
+        .extent( [ [0,0], [width,height] ] )  
+        .on("end", updateChart)   
+
+    const line = group//.append('g')
+      .attr("clip-path", "url(#clip)")
+      line.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("fill", "none")
+        .attr("stroke", "url(#line-gradient)")
+        .attr("stroke-width", 2)
+        .attr("d", d3.line()
+          .x(d => xScale(d.value))
+          .y(d => yScale(d.date))
+          )
+
+      const words = group
+      .selectAll("text")
+      .data(data)
+      .join("text")
+      .attr('x', 600)
+      .attr('y', d => yScale(d.date))
+      .text(d => d.fact)
+       .attr("label", d => d.fact)
+      .attr("id", d => d.fact)
+      .style("font-family", "Helvetica")
+      .style("font-size", "10px")
+      .style("fill", "steelblue")
+      .attr("text-anchor", "middle")
+      .attr("style", "display:none");
+      group
+      .append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    let idleTimeout
+    function idled() { 
+      idleTimeout = null; 
+    }
+    function updateChart(event,d) {
+      extent = event.selection
+      if(!extent){
+        if (!idleTimeout) {
+          return idleTimeout = setTimeout(idled, 100); 
+        }
+        yScale.domain([4,8])
+      }else{
+        yScale.domain([ yScale.invert(extent[0]), yScale.invert(extent[1]) ])
+        group
+          //.selectAll("*")//.select("*")
+          //.filter(node => node === this || node.fact === d.fact)
+          .select(".brush").call(brush.move, null) 
+      }
+      yAxis
+        .transition()
+        .duration(1000)
+        .call(d3.axisRight(yScale))
+      line
+          .select('.line')
+          .transition()
+          .duration(1000)
+          .attr("d", d3.line()
+            .x(d=> xScale(d.value))
+            .y(d=> yScale(d.date))
+          )
+    }
+    svg.on("dblclick",function(){
+      yScale.domain(d3.extent(data, d => d.date))
+      yAxis.transition().call(d3.axisRight(yScale))
+      line
+        .select('.line')
+        //.transition().duration()
+        .attr("d", d3.line()
+        .x(d => xScale(d.value))
+        .y(d => yScale(d.date))
+      )
+    });
+
+
+//mouseover
+  var mouseover = function(event, d) {
+    console.log("mouse in")
+    focus.style("opacity", 1)
+    tooltip.style("opacity",1)
+  }
+
+  var mousemove = function(event, d)  {
+    // recover coordinate we need
+    const y0 = yScale.invert(d3.pointer(event, this)[1]);
+    const i = bisect(data, y0, 1);
+    selectedData = data[i]
+
+    focus
+      .attr("cx", xScale(selectedData.value))
+      .attr("cy", yScale(selectedData.date))
+    tooltip
+    
+            .html("Temperature: " + selectedData.value + " - " + " Date: " + selectedData.date)
+            .style("left", xScale(selectedData.value)+ 2 + "px")
+            .style("top", yScale(selectedData.date) + "px")
+    }
+  var mouseout = function(event, d)  {
+    console.log("mouse out")
+    focus.style("opacity", 0)
+    tooltip.style("opacity", 0)
+  }
+
+    line
+    .on('mouseover', mouseover)
+    .on('mousemove', mousemove)
+    .on('mouseout', mouseout);
+
+
+
+
+
+  
+
+      // const yPosition0 = yScale(new Date(1759, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 600)
+      //   .attr('y', yPosition0)
+      //   .attr("class", "text")
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("iii");
+      // const yPosition01 = yScale(new Date(1770, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 600)
+      //   .attr('y', yPosition01)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1770 The Little Ice Age has ended.");
+      // const yPosition05 = yScale(new Date(1785, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 600)
+      //   .attr('y', yPosition05)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1785 First publication of The Times of London.");
+      // const yPosition1 = yScale(new Date(1830, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 610)
+      //   .attr('y', yPosition1)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1830s Ketchup was once sold")
+      //   .append('tspan')
+      //     .attr('x', 610)
+      //     .attr('dy', '1.2em')
+      //     .text("as a medicine.");
+      //   // .style('font-weight', 'bold')
+      // const yPosition2 = yScale(new Date(1900, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 620)
+      //   .attr('y', yPosition2)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1900~1920 Tug-of-war was once")
+      //   .append('tspan')
+      //     .attr('x', 620)
+      //     .attr('dy', '1.2em')
+      //     .text("an Olympic sport.");
+      // const yPosition3 = yScale(new Date(1905, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 620)
+      //   .attr('y', yPosition3)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1905 Ice pops were accidentally")
+      //   .append('tspan')
+      //     .attr('x', 620)
+      //     .attr('dy', '1.2em')
+      //     .text("invented by a kid!");
+      // const yPosition4 = yScale(new Date(1840, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 600)
+      //   .attr('y', yPosition4)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1840 Say “prunes” for the camera!");
+      // const yPosition15 = yScale(new Date(1896, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 620)
+      //   .attr('y', yPosition15)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1896 The Anglo-Zanzibar War was")
+      //   .append('tspan')
+      //     .attr('x', 620)
+      //     .attr('dy', '1.2em')
+      //     .text("the shortest battle for about 40 min.");
+      // const yPosition19 = yScale(new Date(1991, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 650)
+      //   .attr('y', yPosition19)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1991 The first International")
+      //   .append('tspan')
+      //     .attr('x', 650)
+      //     .attr('dy', '1.2em')
+      //     .text("Weather Festival.");
+      // const yPosition20 = yScale(new Date(1952, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 620)
+      //   .attr('y', yPosition20)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1952 Albert Einstein rejects")
+      //   .append('tspan')
+      //     .attr('x', 620)
+      //     .attr('dy', '1.2em')
+      //     .text("to be the president of Israel.");
+      
+      // const yPosition21 = yScale(new Date(1961, 0, 1)); // 轉換時間軸位置
+      // svg.append('text')
+      //   .attr('x', 620)
+      //   .attr('y', yPosition21)
+      //   .style('fill', 'DarkSlateBlue')
+      //   .style('font-size', '16px')
+      //   .style('font-family', 'Kalam')
+      //   .attr("text-anchor", "start") // 文字錨點設置為結束點
+      //   .append('tspan')
+      //     .text("1961 Obama Barak was born to the world.")
+      //   .append('tspan')
+      //     .attr('x', 620)
+      //     .attr('dy', '1.2em')
+      //     .text("to be the president of Israel.");
+      
+
+
+
+
+
+
+      
+ })
+  </script>
+
+</body>
+</html>
