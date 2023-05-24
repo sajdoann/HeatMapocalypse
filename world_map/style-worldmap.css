@@ -28,6 +28,11 @@ path {
     z-index: 1;
 }
 
+.hovered {
+     fill: yellow;
+}
+
+
 /* Centered textbox styles */
 #textbox {
     position: fixed;
