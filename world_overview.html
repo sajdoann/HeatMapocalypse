@@ -8,10 +8,10 @@
     <script src="https://d3js.org/topojson.v0.min.js"></script>
 </head>
 <body>
-<div id="map-container">
-    <input type="range" name="mySlider" id="mySlider" min="0" max="100" step="1" value="0">
+    <input type="range" name="mySlider" id="mySlider" min="0" max="3244" step="1" value="0">
     <div id="textbox"></div>
-</div>
+
+    <div id="map-container"></div>
 
 <script>
     var width = window.innerWidth,
@@ -36,12 +36,14 @@
         .range(["blue", "red"]);
 
     // load and display the World
-    d3.json("world-110m2.json", function (error, topology) {
+    d3.json("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/world-110m2.json", function (error, topology) {
         var slider = d3.select("#mySlider");
         var textbox = d3.select("#textbox");
 
         // load and display the cities
-        d3.csv("samplepoints.csv", function (error, data) {
+        d3.csv("GlobalTemperatures1m.csv", function (error, data) {
+            var circles;
+
             slider.on("input", function () {
                 var value = +this.value;
                 var year = Math.floor(value / 12) + 1743;
@@ -52,11 +54,13 @@
 
                 // Filter the data based on the selected year and month
                 var filteredData = data.filter(function (d) {
-                    return d.yearmonth === selectedYearMonth;
+                    var dataYear = parseInt(d.yearmonth.substr(0, 4));
+                    var dataMonth = parseInt(d.yearmonth.substr(5, 2));
+                    return dataYear === year && dataMonth === month;
                 });
 
                 // Update the data binding for the circles
-                var circles = g.selectAll("circle").data(filteredData);
+                circles = g.selectAll("circle").data(filteredData);
 
                 circles.enter()
                     .append("a")
@@ -65,27 +69,28 @@
                     })
                     .append("circle")
                     .attr("cx", function (d) {
-                        return projection([d.lon, d.lat])[0];
+                        return projection([+d.lon, +d.lat])[0];
                     })
                     .attr("cy", function (d) {
-                        return projection([d.lon, d.lat])[1];
+                        return projection([+d.lon, +d.lat])[1];
                     })
                     .attr("r", 5)
-                    .style("opacity", 0.5)
+                    .style("opacity", 1)
                     .style("fill", function (d) {
                         return colorScale(+d.AverageTemperature);
                     });
 
                 circles.exit().remove();
+            });
 
-                // Update the existing circles' positions
-                g.selectAll("circle")
-                    .data(filteredData)
+            // Update the existing circles' positions
+            slider.on("change", function () {
+                circles
                     .attr("cx", function(d) {
-                        return projection([d.lon, d.lat])[0];
+                        return projection([+d.lon, +d.lat])[0];
                     })
                     .attr("cy", function(d) {
-                        return projection([d.lon, d.lat])[1];
+                        return projection([+d.lon, +d.lat])[1];
                     })
                     .style("fill", function(d) {
                         return colorScale(+d.AverageTemperature);
