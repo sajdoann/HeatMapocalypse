@@ -5,9 +5,10 @@ var projection = d3.geoNaturalEarth1()
     .translate([width / 2, height / 2])
     .scale(width / 6.5);
 
-var svg = d3.select("#map-container").append("svg")
+var svg = d3.select("body").select("#map-container").append("svg")
     .attr("width", width)
     .attr("height", height);
+
 
 var path = d3.geoPath()
     .projection(projection);

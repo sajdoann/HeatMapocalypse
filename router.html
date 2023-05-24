@@ -1,50 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-    <title>D3 Client-Side Routing</title>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/routie/0.3.2/routie.min.js"></script>
-<style>
-    #map {
-    width: 600px;
-    height: 400px;
-    background-color: lightgray;
-}
-</style>
+    <meta charset="utf-8">
+    <title>HeatMapocalypse</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/routie/0.3.2/routie.min.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="world_map/style-worldmap.css">
+
 </head>
 <body>
 <div id="content"></div>
 
-<div id="map"></div>
-
 <script>
     function renderMainPage() {
-    var content = d3.select("#content");
-    var map = d3.select("#map");
+        var content = d3.select("#content");
+        // Load the world map HTML file
+        d3.html("world_map/world_map.html").then(function(html) {
+            content.html(html.documentElement.innerHTML);
+        });
 
-    // Render the main page content
-    content.html("<h1>Main Page</h1>");
-
-    // Render the map
-    map.text("Map goes here");
-}
+    }
 
     function renderCountryPage(countryName) {
-    var content = d3.select("#content");
+        var content = d3.select("#content");
 
-    // Render the country page content
-    content.html("<h1>" + countryName + " Page</h1>");
-}
+        // Render the country page content
+        content.html("<h1>" + countryName + " Page</h1>");
+    }
 
     routie({
-    '': function() {
-    renderMainPage();
-},
-    'country/:name': function(name) {
-    renderCountryPage(name);
-}
-});
+        '': function() {
+            renderMainPage();
+        },
+        'country/:name': function(name) {
+            renderCountryPage(name);
+        }
+    });
 </script>
 </body>
 </html>
