@@ -2,6 +2,8 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100%;
+    overflow: hidden; /*Prevent scrollbars from appearing */
+    /*position: fixed; */
 }
 
 path {
@@ -12,27 +14,28 @@ path {
 
 #map-container {
     position: relative;
-    height: 100%;
+    height: calc(100% - 0px); /* Subtract the height of the slider */
+    /*overflow: hidden;*/ /* Prevent scrollbars from appearing */
 }
 
 /* Adjust the slider styles */
 #mySlider {
     width: 80%;
-    position: absolute;
-    bottom: 20px;
+    position: fixed;
+    bottom: 100px;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -40%;
     z-index: 1;
 }
 
 /* Centered textbox styles */
 #textbox {
-    position: absolute;
+    position: fixed;
     width: 400px;
-    height: 30px;
-    bottom: 40px;
+    height: 3%;
+    bottom: 120px;
     left: 50%;
-    transform: translateX(-50%);
+    margin-left: -10%;
     background-color: white;
     padding: 4px;
     border: 1px solid black;
