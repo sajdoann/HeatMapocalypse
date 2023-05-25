@@ -2,14 +2,13 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>HeatMapocalypse</title>
+    <title>☀️ HeatMapocalypse</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/routie/0.3.2/routie.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="world_map/style-worldmap.css">
-    <script src="world_map/world_map.js"></script>
 
 </head>
 
@@ -51,20 +50,36 @@
         document.head.appendChild(script);
     }
 
-    function renderMainPage() {
+    /***
+     * loads another page (its html, css and js)
+     * @param HTML_file
+     * @param CSS_file
+     * @param JS_file
+     */
+    function loadContent(HTML_file, CSS_file, JS_file){
         // Clear the existing content
         clearContent();
 
-
         // Load the HTML content
-        loadHTML('world_map/world_map.html');
+        loadHTML(HTML_file);
 
         // Load the CSS styles
-        loadCSS('world_map/style-worldmap.css');
+        loadCSS(CSS_file);
 
         // Load the JavaScript files
-        loadJS('world_map/world_map.js');
+        loadJS(JS_file);
+
     }
+
+    function renderMainPage() {
+        loadContent('world_map/world_map.html', 'world_map/style-worldmap.css', 'world_map/world_map.js');
+    }
+
+    function renderMainPage() {
+        loadContent('lineplot/lineplot_project.html','','lineplot/lineplot.js' );
+    }
+
+
 
     /*function renderCountryPage(countryName) {
         var content = d3.select("#content");
@@ -76,6 +91,9 @@
     routie({
         '': function() {
             renderMainPage();
+        },
+        '/lineplot': function() {
+            renderLineplot();
         },
         /*'country/:name': function(name) {
             renderCountryPage(name);
