@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
 
 
-    <link rel="stylesheet" type="text/css" href="world_map/style-worldmap.css">
 
 </head>
 
@@ -73,22 +72,21 @@
 
     }
 
-    /*function renderMainPage() {
-        loadContent('world_map/world_map.html', 'world_map/style-worldmap.css', 'world_map/world_map.js');
-    }*/
-
     function renderMainPage() {
+        loadContent('world_map/world_map.html', 'world_map/style-worldmap.css', 'world_map/world_map.js');
+    }
+
+    function renderLineplot() {
         loadContent('lineplot/lineplot.html','lineplot/lineplot.css','lineplot/lineplot.js' );
     }
 
-
-
-    /*function renderCountryPage(countryName) {
-        var content = d3.select("#content");
+    function renderCountryPage() {
+        clearContent();
+        var countryName = 'tmp';
 
         // Render the country page content
         content.html("<h1>" + countryName + " Page</h1>");
-    }*/
+    }
 
     routie({
         '': function() {
@@ -97,9 +95,10 @@
         '/lineplot': function() {
             renderLineplot();
         },
-        /*'country/:name': function(name) {
-            renderCountryPage(name);
-        }*/
+        '/country': function() { //http://localhost:63342/heatmapocalypse/router.html#/country
+            renderCountryPage();
+
+        }
     });
 </script>
 

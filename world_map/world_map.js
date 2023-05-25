@@ -94,14 +94,14 @@ d3.json("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/data/wo
                 d3.select(this).classed("hovered", true);
 
                 // Get the country name from the data
-                var countryName = d.properties.name;
+                /*var countryName = d.properties.name;
 
                 // Append a text element for the country label
                 svg.append("text")
                     .attr("class", "country-label")
                     .attr("x", projection(d3.geo.centroid(d))[0])
                     .attr("y", projection(d3.geo.centroid(d))[1])
-                    .text(countryName);
+                    .text(countryName);*/
 
             })
             .on("mouseout", function() {
@@ -109,6 +109,13 @@ d3.json("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/data/wo
                 d3.select(this).classed("hovered", false);
                 svg.select(".country-label").remove();
 
+            })
+            .on("click", function(d) {
+            // Get the country name from the data
+            var countryName = 'taiwan';
+
+            // Change the page to the country view
+                routie('/country?name=' + encodeURIComponent(countryName));
             });
 
     });

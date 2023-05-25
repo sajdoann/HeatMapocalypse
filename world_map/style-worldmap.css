@@ -48,3 +48,10 @@ path {
     color: black;
     z-index: 2;
 }
+
+.country-label {
+    font-size: 12px;
+    fill: black;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
