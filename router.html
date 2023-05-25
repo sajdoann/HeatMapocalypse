@@ -17,31 +17,69 @@
 <div id="content"></div>
 
 <script>
+    function clearContent() {
+        // Clear the contents of the target element where you want to render the pages
+        var targetElement = document.getElementById('content');
+        targetElement.innerHTML = '';
+    }
+
+    function loadHTML(filename) {
+        // Load the HTML content dynamically
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', filename, false);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var targetElement = document.getElementById('content');
+                targetElement.innerHTML = xhr.responseText;
+            }
+        };
+        xhr.send();
+    }
+
+    function loadCSS(filename) {
+        // Load the CSS file dynamically
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = filename;
+        document.head.appendChild(link);
+    }
+
+    function loadJS(filename) {
+        // Load the JavaScript file dynamically
+        var script = document.createElement('script');
+        script.src = filename;
+        document.head.appendChild(script);
+    }
+
     function renderMainPage() {
-        var content = d3.select("#content");
-        // Load the world map HTML file
-        d3.html("world_map/world_map.html").then(function(html) {
-            content.html(html.documentElement.innerHTML);
-        });
+        // Clear the existing content
+        clearContent();
 
 
+        // Load the HTML content
+        loadHTML('world_map/world_map.html');
 
-}
+        // Load the CSS styles
+        loadCSS('world_map/style-worldmap.css');
 
-    function renderCountryPage(countryName) {
+        // Load the JavaScript files
+        loadJS('world_map/world_map.js');
+    }
+
+    /*function renderCountryPage(countryName) {
         var content = d3.select("#content");
 
         // Render the country page content
         content.html("<h1>" + countryName + " Page</h1>");
-    }
+    }*/
 
     routie({
         '': function() {
             renderMainPage();
         },
-        'country/:name': function(name) {
+        /*'country/:name': function(name) {
             renderCountryPage(name);
-        }
+        }*/
     });
 </script>
 
