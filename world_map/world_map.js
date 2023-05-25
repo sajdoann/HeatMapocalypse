@@ -22,7 +22,7 @@ var colorScale = d3.scaleLinear()
 
 
 // load and display the World
-d3.json("../data/world-110m2.json")
+d3.json("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/data/world-110m2.json")
     .then(function (topology) {
         var slider = d3.select("#mySlider");
         var textbox = d3.select("#textbox");

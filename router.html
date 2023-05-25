@@ -9,8 +9,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/routie/0.3.2/routie.min.js"></script>
 
     <link rel="stylesheet" type="text/css" href="world_map/style-worldmap.css">
+    <script src="world_map/world_map.js"></script>
 
 </head>
+
 <body>
 <div id="content"></div>
 
@@ -22,7 +24,9 @@
             content.html(html.documentElement.innerHTML);
         });
 
-    }
+
+
+}
 
     function renderCountryPage(countryName) {
         var content = d3.select("#content");
@@ -40,5 +44,6 @@
         }
     });
 </script>
+
 </body>
 </html>
