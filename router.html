@@ -5,6 +5,8 @@
     <title>☀️ HeatMapocalypse</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src='https://cdn.plot.ly/plotly-2.20.0.min.js'></script> <!--for spiral plot -->
+
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/routie/0.3.2/routie.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
@@ -80,12 +82,17 @@
         loadContent('lineplot/lineplot.html','lineplot/lineplot.css','lineplot/lineplot.js' );
     }
 
-    function renderCountryPage() {
+    function renderCountryPage(name) {
+        if(name.includes('=')) {
+            name = name.split('=')[1];
+        }
+        console.log("Country Name:", name);
+
         clearContent();
-        var countryName = 'tmp';
+        var content = document.getElementById('content');
 
         // Render the country page content
-        content.html("<h1>" + countryName + " Page</h1>");
+        content.innerHTML = "<h1>" + name + " Page</h1>";
     }
 
     routie({
@@ -95,8 +102,9 @@
         '/lineplot': function() {
             renderLineplot();
         },
-        '/country': function() { //http://localhost:63342/heatmapocalypse/router.html#/country
-            renderCountryPage();
+        '/country:name': function(name='') { //http://localhost:63342/heatmapocalypse/router.html#/country
+            // Render the country page
+            renderCountryPage(name);
 
         }
     });
