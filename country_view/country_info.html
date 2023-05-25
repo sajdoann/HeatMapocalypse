@@ -1,0 +1,35 @@
+<head>
+	<link rel="stylesheet" herf="country_info.css">
+</head>
+
+<body>
+    <div class="box">
+        <div class="elements bg"><p>temperature in that time here</p></div>
+        <div class="elements imgBox">            
+            <img src=""alt="Nation flag here">
+        </div>
+        <div class="elements name">
+            <h2>Country name here</h2>
+        </div>
+        <div class="elements content">
+            <p>some thing about the country. Not sure where to get these information</p>
+        </div>
+        <div class="card"></div>
+    </div>
+</body>
+
+<script 
+    src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js" 
+    integrity="sha512-RX/OFugt/bkgwRQg4B22KYE79dQhwaPp2IZaA/YyU3GMo/qY7GrXkiG6Dvvwnds6/DefCfwPTgCXnaC6nAgVYw==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer">
+</script>
+<script >
+	VanillaTilt.init(document.querySelector(".box"), {
+		max: 25,
+		speed: 400
+	});
+	
+	//It also supports NodeList
+	VanillaTilt.init(document.querySelectorAll(".box"));
+</script>
