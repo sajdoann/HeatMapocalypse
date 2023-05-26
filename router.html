@@ -25,12 +25,13 @@
         targetElement.innerHTML = '';
     }
 
-    function loadHTML(filename) {
+    function loadHTML(filename, callback=function (){}) {
         // Load the HTML content dynamically
         var xhr = new XMLHttpRequest();
         xhr.open('GET', filename, false);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
+                callback(xhr.responseText); // Pass the loaded HTML content to the callback if needed
                 var targetElement = document.getElementById('content');
                 targetElement.innerHTML = xhr.responseText;
             }
@@ -82,17 +83,24 @@
         loadContent('lineplot/lineplot.html','lineplot/lineplot.css','lineplot/lineplot.js' );
     }
 
-    function renderCountryPage(name) {
-        if(name.includes('=')) {
-            name = name.split('=')[1];
+    function renderCountryPage(country_id) {
+        if(country_id.includes('=')) {
+            country_id = country_id.split('=')[1];
         }
-        console.log("Country Name:", name);
+        console.log("Country id:", country_id);
 
         clearContent();
-        var content = document.getElementById('content');
 
-        // Render the country page content
-        content.innerHTML = "<h1>" + name + " Page</h1>";
+        loadHTML('country_view/tmp.html', function(htmlContent) {
+            //console.log("Loaded HTML content:", htmlContent);
+
+            //console.log("Country id:", country_id);
+
+            loadJS('country_view/spiral.js');
+        });
+
+        //
+        content.innerHTML = content.innerHTML.replace('<span id="country-id"></span>', '<span id="country-id">' + country_id + '</span>');
     }
 
     routie({
@@ -102,9 +110,9 @@
         '/lineplot': function() {
             renderLineplot();
         },
-        '/country:name': function(name='') { //http://localhost:63342/heatmapocalypse/router.html#/country
+        '/country:id': function(id='') { //http://localhost:63342/heatmapocalypse/router.html#/country
             // Render the country page
-            renderCountryPage(name);
+            renderCountryPage(id);
 
         }
     });
