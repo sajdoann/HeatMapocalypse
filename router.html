@@ -91,16 +91,10 @@
 
         clearContent();
 
-        loadHTML('country_view/tmp.html', function(htmlContent) {
-            //console.log("Loaded HTML content:", htmlContent);
-
-            //console.log("Country id:", country_id);
-
-            loadJS('country_view/spiral.js');
-        });
-
-        //
+        loadHTML('country_view/tmp.html');
         content.innerHTML = content.innerHTML.replace('<span id="country-id"></span>', '<span id="country-id">' + country_id + '</span>');
+        loadJS('country_view/spiral.js');
+
     }
 
     routie({
