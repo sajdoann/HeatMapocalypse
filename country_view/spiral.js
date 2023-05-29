@@ -20,15 +20,15 @@ function ConvertTDate2location(strDate) {
 }
 
 //Read the data
-d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main/GlobalLandTemperaturesByMajorCity.csv").then(function(data){
+d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main/GlobalLandTemperaturesByCountry.csv").then(function(data){
 
     // filter by country
-    var Country = "Turkey";
+    var id = "4";
     data = data.filter(function(d) {
-        return d.Country == Country;
+        return d.id == id;
     })
-    var sYear = 1800;
-    var eYear = 1820;
+    var sYear = 1300;
+    var eYear = 1900;
     data = data.filter(function(d) {
         y = parseInt(d.dt) ;
         return (y > sYear && y < eYear);
@@ -37,6 +37,8 @@ d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main
     var pointCount = data.length;
     var i, r;
 
+    var dt = [];
+    var txt = [];
     var x = [];
     var y = [];
     var z = [];
@@ -53,13 +55,28 @@ d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main
         mon = parseInt(data[i].dt.split('-')[1])
         year = parseInt(data[i].dt.split('-')[0])
         // things endeo with date
+        dt.push(data[i].dt.split('-')[0])
+        txt.push({dt:data[i].dt.split('-')[0] , tmp:data[i].AverageTemperature})
         x.push(r * Math.cos(mon/6 * Math.PI) );
         y.push(r * Math.sin(mon/6 * Math.PI) );
-        z.push((year-1755 + mon/12)/2);
+        z.push((year + mon/12));
+    }
+
+    var sliderSteps = [];
+    for (i = 0; i < pointCount; i++) {
+        sliderSteps.push({
+            method: 'animate',
+            label: dt[i],
+            args: [[dt[i]], {
+                mode: 'immediate',
+                transition: {duration: 100},
+                frame: {duration: 100, redraw: false},
+            }]
+        });
     }
     var layout = {
         title: {
-            text: Country,
+            text: id,
             font: {
                 family: 'Courier New, monospace',
                 size: 70
@@ -67,6 +84,21 @@ d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main
             yref: 'paper',
             automargin: true,
         },
+        scene: {
+            xaxis:{title: '', visible: false, showgrid: false},
+            yaxis:{title: '', visible: false, showgrid: false},
+            zaxis:{title: 'Year'},
+        },
+        // sliders: [{
+        //     pad: {t: 35},
+        //     currentvalue: {
+        //       visible: true,
+        //       prefix: 'Year:',
+        //       xanchor: 'right',
+        //       font: {size: 20, color: '#666'}
+        //     },
+        //     steps: sliderSteps
+        // }],
         showlegend: false
     };
 
@@ -76,10 +108,21 @@ d3.csv("https://raw.githubusercontent.com/lsps9150125/MIS588_Data_Visualize/main
         x: x,
         y: y,
         z: z,
+        text: txt,
+        hovertemplate:
+            "<b>Year %{text.dt}</b><br><br>" +
+            "Temperature: %{text.tmp}°C" +
+            "<extra></extra>",
         opacity: 0.7,
         line: {
             width: 10,
             color: c,
-            colorscale: 'Inferno'} //color scale
-    }],layout);
+            colorscale: 'Inferno'}, //color scale
+        transform: {
+              type: 'filter',
+              target: z,
+              operation: '<',
+              value: 0}
+        }],
+        layout);
 });
