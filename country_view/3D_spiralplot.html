@@ -2,10 +2,21 @@
 	<!-- Load plotly.js into the DOM -->
 	<script src='https://cdn.plot.ly/plotly-2.20.0.min.js'></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
 </head>
 
 <body>
+	<div >end of year</div>
+	<input type="text" id="datepicker">
 	<div id='mySprial'><!-- Plotly chart will be drawn inside this DIV --></div>
 </body>
 
 <script src="spiral.js"></script>
+<script>
+	$(function() {
+	$( "#datepicker" ).datepicker();
+	});
+</script>
