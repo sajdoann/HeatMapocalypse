@@ -265,28 +265,29 @@
         .on('mousemove', mousemove)
         .on('mouseout', mouseout);
 
+      
+    //Animation
     function animate() {
       const path = d3.select(".line");
       const path2 = d3.select(".line2");
 
-      // 計算線段的總長度
+      // animation
       const totalLength = path.node().getTotalLength();
       const totalLength2 = path2.node().getTotalLength();
-      // 初始化線段的stroke-dasharray為0，即不可見
+      // stroke-dasharray
       path.attr("stroke-dasharray", `${totalLength},${totalLength}`)
       .attr("stroke-dashoffset", totalLength);
       path2.attr("stroke-dasharray", `${totalLength2},${totalLength2}`)
       .attr("stroke-dashoffset", totalLength2);
-      // 執行動畫
+      // execute
       path.transition()
-        .duration(2500) // 動畫持續時間
+        .duration(2500) 
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
       path2.transition()
-        .duration(2000) // 動畫持續時間
+        .duration(2000) 
         .ease(d3.easeLinear)
         .attr("stroke-dashoffset", 0);
-  // 如果需要，你可以為其他元素添加類似的動畫效果，如標籤(label)
 }
 
 animate();
