@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style-worldmap.css">
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+</head>
+<body>
+<input type="range" name="mySlider" id="mySlider" min="0" max="3244" step="1" value="0">
+<div id="textbox"></div>
+<div id="map-container"></div>
+<div id="color-legend">
+    <div class="color-bar">
+        <div class="color-bar-colors"></div>
+    </div>
+    <div class="legend-labels">
+    </div>
+</div>
+
+<script src="world_map.js"></script>
+</body>
+</html>
