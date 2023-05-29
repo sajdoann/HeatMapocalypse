@@ -106,13 +106,16 @@ d3.json("https://raw.githubusercontent.com/sajdoann/HeatMapocalypse/main/data/wo
         // Define the color legend
         var legendData = d3.range(0, 31, 5); // Adjust the range and intervals as needed
 
+        // Define the color legend
         var legend = svg.append("g")
             .attr("class", "legend")
+            .attr("transform", "translate(20, " + (height - 250) + ")")
             .style("position", "fixed")
             .style("bottom", "20px")
             .style("left", "20px")
             .style("pointer-events", "none")
             .style("z-index", "9999");
+
 
         // Add color rectangles to the legend
         legend.selectAll("rect")
